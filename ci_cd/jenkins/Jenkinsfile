@@ -6,6 +6,15 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/skalokhe/ML-DevOps-Pipeline.git'
             }
         }
+        stage('Setup Python') {
+            steps {
+                sh '''
+                    apt-get update
+                    apt-get install -y python3 python3-pip
+                    python3 -m pip install --upgrade pip
+                '''
+            }
+        }
         stage('Install Dependencies') {
             steps {
                 echo " Install dependencies"
