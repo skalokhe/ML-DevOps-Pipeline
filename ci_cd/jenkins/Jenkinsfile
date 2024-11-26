@@ -12,7 +12,12 @@ pipeline {
                 '''
             }
         }
-        
+
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/skalokhe/ML-DevOps-Pipeline.git'
+            }
+        }
         stage('Install Requirements') {
             steps {
                 bat '''
