@@ -1,0 +1,19 @@
+version: "3"
+services:
+  clair:
+    image: quay.io/coreos/clair:latest
+    ports:
+      - "6060:6060"
+      - "6061:6061"
+    environment:
+      - CLAIR_DB_HOST=postgres
+      - CLAIR_DB_PORT=5432
+      - CLAIR_DB_USER=postgres
+      - CLAIR_DB_PASSWORD=clair
+      - CLAIR_DB_NAME=clair
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: clair
+      POSTGRES_DB: clair

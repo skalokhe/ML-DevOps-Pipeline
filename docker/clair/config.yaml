@@ -1,0 +1,9 @@
+clair:
+  database:
+    type: postgres
+    options:
+      source: host=postgres user=postgres password=clair dbname=clair sslmode=disable
+  api:
+    healthport: 6061
+    port: 6060
+    timeout: 900s

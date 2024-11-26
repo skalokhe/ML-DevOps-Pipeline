@@ -1,0 +1,18 @@
+{
+    "dashboard": {
+      "panels": [
+        {
+          "type": "graph",
+          "title": "ML Pipeline Metrics",
+          "targets": [
+            {
+              "expr": "container_cpu_usage_seconds_total",
+              "legendFormat": "{{container_name}}",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
+    }
+  }
+  

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ML Pipeline Dashboard</title>
+    <script>
+        async function fetchMetrics() {
+            const response = await fetch('/metrics');
+            const data = await response.json();
+            document.getElementById('cpu').innerText = `CPU Usage: ${data.cpu_usage}%`;
+            document.getElementById('memory').innerText = `Memory Usage: ${data.memory_usage}%`;
+            document.getElementById('status').innerText = `Status: ${data.status}`;
+        }
+        setInterval(fetchMetrics, 5000); // Refresh every 5 seconds
+    </script>
+</head>
+<body onload="fetchMetrics()">
+    <h1>ML Pipeline Dashboard</h1>
+    <p id="cpu"></p>
+    <p id="memory"></p>
+    <p id="status"></p>
+</body>
+</html>

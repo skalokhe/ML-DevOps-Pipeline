@@ -1,0 +1,7 @@
+rules:
+  - rule: Detect suspicious shell
+    desc: A shell is run inside a container.
+    condition: evt.type = execve and proc.name in ("sh", "bash")
+    output: "Shell detected inside container (user=%user.name container=%container.id)"
+    priority: WARNING
+    tags: [container, runtime]

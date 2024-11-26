@@ -1,0 +1,10 @@
+flask
+tensorflow
+numpy
+pandas
+boto3
+pytest
+clair
+gunicorn
+docker
+prometheus_client
