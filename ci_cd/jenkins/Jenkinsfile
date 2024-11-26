@@ -1,59 +1,63 @@
 pipeline {
     agent any
-        
+
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/skalokhe/ML-DevOps-Pipeline.git'
             }
         }
-        stage('Setup Python Environment') {
+
+        stage('Install Dependencies') {
             steps {
                 bat '''
                     python -m pip install --upgrade pip
-                    pip install virtualenv
+                    python -m pip install virtualenv
                     python -m virtualenv venv
-                    .\\venv\\Scripts\\activate
+                    call venv\\Scripts\\activate.bat
+                    python -m pip install -r requirements.txt
+                    python -m pip install pytest
                 '''
             }
         }
 
-        stage('Install Requirements') {
+        stage('Test') {
             steps {
                 bat '''
-                    .\\venv\\Scripts\\activate
-                    pip install -r requirements.txt
+                    call venv\\Scripts\\activate.bat
+                    python -m pytest
                 '''
             }
         }
-        
-        stage('Run Tests') {
-            steps {
-                bat '''
-                    .\\venv\\Scripts\\activate
-                    python -m pytest tests/
-                '''
-            }
-        }
-        
+
         stage('Build Docker Image') {
             steps {
                 bat 'docker build -t ml-pipeline:latest .'
             }
         }
-        
-        stage('Run Docker Container') {
+
+        stage('Push Docker Image') {
             steps {
-                bat 'docker run -d -p 5000:5000 ml-pipeline:latest'
+                withCredentials([string(credentialsId: 'docker-hub-password', variable: 'DOCKER_PASSWORD')]) {
+                    bat 'echo %DOCKER_PASSWORD% | docker login -u your-dockerhub-username --password-stdin'
+                    bat 'docker push ml-pipeline:latest'
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                bat 'kubectl apply -f docker/kubernetes/deployment.yml'
             }
         }
     }
-    
+
     post {
         always {
             bat '''
-                deactivate
-                rmdir /s /q venv
+                IF EXIST venv (
+                    rmdir /s /q venv
+                )
             '''
         }
     }
