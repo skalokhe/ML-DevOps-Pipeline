@@ -1,13 +1,12 @@
 pipeline {
     agent any
-    
-    stage('Checkout') {
+        
+    stages {
+        stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/skalokhe/ML-DevOps-Pipeline.git'
             }
         }
-    
-    stages {
         stage('Setup Python Environment') {
             steps {
                 bat '''
