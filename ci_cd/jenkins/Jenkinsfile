@@ -1,64 +1,38 @@
 pipeline {
     agent any
-
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/skalokhe/ML-DevOps-Pipeline.git'
             }
         }
-
         stage('Install Dependencies') {
             steps {
-                bat '''
-                    python -m pip install --upgrade pip
-                    python -m pip install virtualenv
-                    python -m virtualenv venv
-                    call venv\\Scripts\\activate.bat
-                    python -m pip install -r requirements.txt
-                    python -m pip install pytest
-                '''
+                sh 'pip install -r requirements.txt'
             }
         }
-
         stage('Test') {
             steps {
-                bat '''
-                    call venv\\Scripts\\activate.bat
-                    python -m pytest
-                '''
+                sh 'pytest'
             }
         }
-
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t ml-pipeline:latest .'
+                sh 'docker build -t ml-pipeline:latest .'
             }
         }
-
         stage('Push Docker Image') {
             steps {
                 withCredentials([string(credentialsId: 'docker-hub-password', variable: 'DOCKER_PASSWORD')]) {
-                    bat 'echo %DOCKER_PASSWORD% | docker login -u your-dockerhub-username --password-stdin'
-                    bat 'docker push ml-pipeline:latest'
+                    sh 'echo $DOCKER_PASSWORD | docker login -u your-dockerhub-username --password-stdin'
+                    sh 'docker push ml-pipeline:latest'
                 }
             }
         }
-
         stage('Deploy to Kubernetes') {
             steps {
-                bat 'kubectl apply -f docker/kubernetes/deployment.yml'
+                sh 'kubectl apply -f docker/kubernetes/deployment.yml'
             }
-        }
-    }
-
-    post {
-        always {
-            bat '''
-                IF EXIST venv (
-                    rmdir /s /q venv
-                )
-            '''
         }
     }
 }
