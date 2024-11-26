@@ -1,43 +1,55 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.8-slim'
-        }
-    }
+    agent any
+    
     stages {
-        stage('Checkout') {
+        stage('Setup Python Environment') {
             steps {
-                git branch: 'main', url: 'https://github.com/skalokhe/ML-DevOps-Pipeline.git'
+                bat '''
+                    python -m pip install --upgrade pip
+                    pip install virtualenv
+                    python -m virtualenv venv
+                    .\\venv\\Scripts\\activate
+                '''
             }
         }
-        stage('Install Dependencies') {
+        
+        stage('Install Requirements') {
             steps {
-                echo " Install dependencies"
-                sh 'pip install -r requirements.txt'
+                bat '''
+                    .\\venv\\Scripts\\activate
+                    pip install -r requirements.txt
+                '''
             }
         }
-        stage('Test') {
+        
+        stage('Run Tests') {
             steps {
-                sh 'pytest'
+                bat '''
+                    .\\venv\\Scripts\\activate
+                    python -m pytest tests/
+                '''
             }
         }
+        
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t ml-pipeline:latest .'
+                bat 'docker build -t ml-pipeline:latest .'
             }
         }
-        stage('Push Docker Image') {
+        
+        stage('Run Docker Container') {
             steps {
-                withCredentials([string(credentialsId: 'docker-hub-password', variable: 'DOCKER_PASSWORD')]) {
-                    sh 'echo $DOCKER_PASSWORD | docker login -u your-dockerhub-username --password-stdin'
-                    sh 'docker push ml-pipeline:latest'
-                }
+                bat 'docker run -d -p 5000:5000 ml-pipeline:latest'
             }
         }
-        stage('Deploy to Kubernetes') {
-            steps {
-                sh 'kubectl apply -f docker/kubernetes/deployment.yml'
-            }
+    }
+    
+    post {
+        always {
+            bat '''
+                deactivate
+                rmdir /s /q venv
+            '''
         }
     }
 }
