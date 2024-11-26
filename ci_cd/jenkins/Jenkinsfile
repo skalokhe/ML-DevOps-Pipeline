@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/your-repo-url'
+                git branch: 'main', url: 'https://github.com/skalokhe/ML-DevOps-Pipeline.git'
             }
         }
         stage('Install Dependencies') {
