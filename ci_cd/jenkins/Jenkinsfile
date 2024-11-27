@@ -1,37 +1,46 @@
 pipeline {
     agent any
+
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/skalokhe/ML-DevOps-Pipeline.git'
             }
         }
+
         stage('Install Dependencies') {
             steps {
-                sh 'pip install -r requirements.txt'
+                bat '''
+                    python -m pip install --upgrade pip
+                    python -m pip install -r requirements.txt
+                '''
             }
         }
+
         stage('Test') {
             steps {
-                sh 'pytest'
+                bat 'python -m pytest'
             }
         }
+
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t ml-pipeline:latest .'
+                bat 'docker build -t ml-pipeline:latest .'
             }
         }
+
         stage('Push Docker Image') {
             steps {
                 withCredentials([string(credentialsId: 'docker-hub-password', variable: 'DOCKER_PASSWORD')]) {
-                    sh 'echo $DOCKER_PASSWORD | docker login -u your-dockerhub-username --password-stdin'
-                    sh 'docker push ml-pipeline:latest'
+                    bat 'echo %DOCKER_PASSWORD% | docker login -u your-dockerhub-username --password-stdin'
+                    bat 'docker push ml-pipeline:latest'
                 }
             }
         }
+
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f docker/kubernetes/deployment.yml'
+                bat 'kubectl apply -f docker/kubernetes/deployment.yml'
             }
         }
     }
