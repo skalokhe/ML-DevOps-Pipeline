@@ -1,5 +1,6 @@
 # Use Python 3.8 slim image
-FROM python:3.8-slim
+FROM ubuntu:latest
+RUN apt-get update && apt-get install -y python3
 #setting variables 
 ENV TF_ENABLE_ONEDNN_OPTS=1
 ENV PYTHONUNBUFFERED=1
